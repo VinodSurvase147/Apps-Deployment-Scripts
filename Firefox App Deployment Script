@@ -1,0 +1,33 @@
+Firefox App Deployment Script
+
+# Purpose: Install Mozilla Firefox x64 bit version
+# Author : Vinod
+# Date : 09 Jan 2024
+
+$ScriptRoot = Split-path -path $MyInvocation.mycommand.path
+$REDInitialFile = "$ScriptRoot\Firefox Setup 121.0.1.exe"
+$REDArguments = "/S /DesktopShortcut=false /PreventRebootRequired={true}"
+
+# Install Firefox
+
+Start-Process -FilePath $REDInitialFile -ArgumentList $REDArguments -Wait 
+
+=================================================================================
+
+# Purpose : Uninstall Mozilla Firefox x64 bit version
+# Author : Vinod
+# Date : 09 Jan 2024
+
+# Uninstall Mozilla Firefox
+
+# variables
+
+$REDUninstallFile = "C:\Program Files\Mozilla Firefox\uninstall\helper.exe" 
+$REDArguments = "/S"
+
+Start-Process -FilePath $REDUninstallFile -ArgumentList $REDArguments -wait 
+
+
+
+
+# "C:\Program Files\Mozilla Firefox\uninstall\helper.exe"
