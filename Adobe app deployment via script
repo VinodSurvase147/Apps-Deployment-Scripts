@@ -1,0 +1,46 @@
+This is for Adobe app deployment via script
+
+$scriptPath = Split-Path -Path $MyInvocation.MyCommand.Path
+
+$logFilePath = "C:\Users\VinodSurvase\InstallAdobeAcrobat.log"
+
+$logDirectory = Split-Path -Path $logFilePath
+if (-not (Test-Path $logDirectory)) {
+    New-Item -ItemType Directory -Path $logDirectory | Out-Null
+}
+
+$installArgs = "EULA_ACCEPT=YES /update $scriptPath\AcrobatDCx64Upd2300820421.msp /qn /norestart /log $logFilePath"
+
+Start-Process -FilePath "$scriptPath\AcroPro.msi" -ArgumentList $installArgs -Wait
+
+$featureLockDownKey = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Adobe\Adobe Acrobat\DC\FeatureLockDown"
+$cIPMKey = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Adobe\Adobe Acrobat\DC\FeatureLockDown\cIPM"
+
+$featureLockDownStringValue = "bIsSCReducedModeEnforcedEx"
+$featureLockDownDwordValue = "00000001"
+$cIPMStringValue = "bDontShowMsgWhenViewingDoc"
+$cIPMDwordValue = "00000000"
+
+reg.exe add "$featureLockDownKey" /v "$featureLockDownStringValue" /t REG_DWORD /d $featureLockDownDwordValue /f /reg:64
+reg.exe add "$cIPMKey" /v "$cIPMStringValue" /t REG_DWORD /d $cIPMDwordValue /f /reg:64
+
+=====================
+
+
+#Define the software name to search for
+$softwareNamePattern = "Adobe Acrobat"
+
+#Query WMI for installed software matching the pattern
+$softwareToRemove = Get-WmiObject -Class Win32_Product | Where-Object { $_.Name -like "$softwareNamePattern*" }
+
+#Uninstall the matching software
+foreach ($software in $softwareToRemove) {
+    Write-Output "Uninstalling software: $($software.Name)"
+    $uninstallResult = $software.Uninstall()
+    
+    if ($uninstallResult.ReturnValue -eq 0) {
+        Write-Output "Uninstall successful."
+    } else {
+        Write-Output "Uninstall failed. Return code: $($uninstallResult.ReturnValue)"
+    }
+}
